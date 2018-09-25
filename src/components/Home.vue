@@ -8,7 +8,12 @@
         <v-btn large to="/meetup/new" class="info">Organize Meetup</v-btn>
       </v-flex>
     </v-layout>
-    <v-layout row wrap class="mt-2">
+    <v-layout v-if="loading" row wrap class="mt-5">
+      <v-flex xs12 class="text-xs-center">
+        <v-progress-circular indeterminate :size="70" :width="7" color="primary"></v-progress-circular>
+      </v-flex>
+    </v-layout>
+    <v-layout v-else row wrap class="mt-2">
       <v-flex xs12>
         <v-carousel style="cursor: pointer;">
           <v-carousel-item @click="onLoadMeetup(m)" v-for="m in featuredMeetups" :key="m.id" :src="m.imageUrl">
@@ -19,7 +24,7 @@
         </v-carousel>
       </v-flex>
     </v-layout>
-    <v-layout row wrap class="mt-2">
+    <v-layout v-if="!loading" row wrap class="mt-2">
       <v-flex xs12 class="text-xs-center">
         <p>Join our awesome meetups!</p>
       </v-flex>
@@ -33,13 +38,14 @@ import { mapGetters } from 'vuex';
 export default {
   data: () => ({}),
   computed: {
-    ...mapGetters(['featuredMeetups'])
+    ...mapGetters(['featuredMeetups', 'loading'])
   },
   methods: {
     onLoadMeetup({ id }) {
       this.$router.push({ name: 'Meetup', params: { id } });
     }
-  }
+  },
+  created() {}
 };
 </script>
 

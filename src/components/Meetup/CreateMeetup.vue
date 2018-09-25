@@ -10,7 +10,10 @@
         <v-form ref="form" lazy-validation v-model="valid">
           <v-text-field v-model="title" :rules="titleRules" label="Title" required></v-text-field>
           <v-text-field v-model="location" :rules="locationRules" label="Location" required></v-text-field>
-          <v-text-field v-model="imageUrl" :rules="imageUrlRules" label="Image URL" required></v-text-field>
+          <div>
+            <v-btn raised color="primary" @click="onPickFile">Upload Image</v-btn>
+            <input ref="file" type="file" style="display: none;" accept="image/*" @change="onFilePicked">
+          </div>
           <v-img @error="onImageError" v-if="imageUrl" :src="imageUrl" />
           <v-textarea v-model="description" :rules="descriptionRules" name="description" label="Description" required></v-textarea>
           <div class="my-2">
@@ -30,8 +33,13 @@
               </v-flex>
             </v-layout>
           </div>
-          <v-btn :disabled="!valid" class="primary" @click="onSubmit">Create Meetup</v-btn>
-          <v-btn class="warning" @click="onCancel">Cancel</v-btn>
+          <v-btn :disabled="!valid || loading" :loading="loading" color="primary" @click="onSubmit">
+            Create Meetup
+            <span slot="loader" class="custom-loader">
+              <v-icon light>cached</v-icon>
+            </span>
+          </v-btn>
+          <v-btn color="warning" @click="onCancel">Cancel</v-btn>
         </v-form>
       </v-flex>
     </v-layout>
@@ -42,15 +50,17 @@
 export default {
   data: () => ({
     valid: true,
+    error: null,
+    loading: false,
     title: '',
     location: '',
     imageUrl: '',
+    image: null,
     description: '',
     date: new Date().toISOString().substr(0, 10),
     time: new Date().toISOString().substr(11, 5),
     titleRules: [title => !!title || 'Title is required'],
     locationRules: [location => !!location || 'Location is required'],
-    imageUrlRules: [imageUrl => !!imageUrl || 'image URL is required'],
     descriptionRules: [
       description => !!description || 'Description is required'
     ]
@@ -61,25 +71,53 @@ export default {
     }
   },
   methods: {
-    onSubmit() {
+    async onSubmit() {
       if (!this.$refs.form.validate()) {
+        return;
+      }
+      if (!this.image) {
         return;
       }
       const payload = {
         title: this.title,
         location: this.location,
-        imageUrl: this.imageUrl,
         description: this.description,
-        date: this.datetime
+        date: this.datetime.toISOString(),
+        image: this.image
       };
-      this.$store.dispatch('createMeetup', payload);
-      this.$router.push({ name: 'Meetups' });
+      try {
+        this.loading = true;
+        this.error = null;
+        await this.$store.dispatch('createMeetup', payload);
+        this.$router.push({ name: 'Meetups' });
+      } catch (err) {
+        console.error(err);
+        this.error = err.message;
+      } finally {
+        this.loading = false;
+      }
     },
     onCancel() {
       this.$refs.form.reset();
     },
     onImageError() {
-      console.log('Could not load image');
+      console.log('onImageError');
+    },
+    onPickFile() {
+      this.$refs.file.click();
+    },
+    onFilePicked(e) {
+      const [file] = e.target.files;
+      const { name } = file;
+      if (name.lastIndexOf('.') < 0) {
+        return alert('Please add a valid file!');
+      }
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.addEventListener('load', () => {
+        this.imageUrl = fileReader.result;
+        this.image = file;
+      });
     }
   }
 };

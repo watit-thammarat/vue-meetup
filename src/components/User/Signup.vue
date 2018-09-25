@@ -74,7 +74,6 @@ export default {
         await this.$store.dispatch('signup', this.payload);
         // this.$router.push({ name: 'Home' });
       } catch (err) {
-        console.error(err);
         this.error = err.message;
       } finally {
         this.loading = false;

@@ -11,8 +11,8 @@
           <v-card-text>
             <v-container>
               <v-form ref="form" lazy-validation v-model="valid">
-                <v-text-field :rules="emailRules" label="Mail" v-model="payload.email" type="email" required></v-text-field>
-                <v-text-field :rules="passwordRules" label="Password" v-model="payload.password" type="password" required></v-text-field>
+                <v-text-field @keyup.enter="onSubmit" :rules="emailRules" label="Mail" v-model="payload.email" type="email" required></v-text-field>
+                <v-text-field @keyup.enter="onSubmit" :rules="passwordRules" label="Password" v-model="payload.password" type="password" required></v-text-field>
                 <v-btn :disabled="!valid || loading" :loading="loading" class="info" @click="onSubmit">
                   Sign in
                   <span slot="loader" class="custom-loader">
@@ -68,7 +68,6 @@ export default {
         await this.$store.dispatch('signin', this.payload);
         // this.$router.push({ name: 'Home' });
       } catch (err) {
-        console.error(err);
         this.error = err.message;
       } finally {
         this.loading = false;

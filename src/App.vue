@@ -10,6 +10,14 @@
             {{ m.title }}
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile v-if="isAuthenticated" @click="onLogout">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            Logout
+          </v-list-tile-content>
+        </v-list-tile>
       </v-list>
     </v-navigation-drawer>
     <v-toolbar app class="primary" dark>
@@ -24,6 +32,10 @@
         <v-btn exact :to="m.link" flat v-for="(m, i) in menuItems" :key="i">
           <v-icon left>{{ m.icon }}</v-icon>
           {{ m.title }}
+        </v-btn>
+        <v-btn flat @click="onLogout">
+          <v-icon left>exit_to_app</v-icon>
+          Logout
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -61,6 +73,13 @@ export default {
         ];
       }
       return data;
+    }
+  },
+  methods: {
+    onLogout() {
+      this.$store.dispatch('logout');
+      this.$router.push({ name: 'Signin' });
+      this.sideNav = false;
     }
   }
 };
